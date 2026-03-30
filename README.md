@@ -2,6 +2,7 @@
 
 [![Live Demo](https://img.shields.io/badge/demo-live-brightgreen)](https://shipitandpray.github.io/pretext-forms/) [![npm](https://img.shields.io/npm/v/@shipitandpray/pretext-forms?color=blue)](https://www.npmjs.com/package/@shipitandpray/pretext-forms)
 
+> **[View Live Demo](https://shipitandpray.github.io/pretext-forms/)**
 Auto-sizing form fields that know their height before render. Zero CLS. Zero flash.
 
 Built on [@chenglou/pretext](https://github.com/chenglou/pretext) -- a pure JavaScript text measurement and layout engine. No hidden divs, no `scrollHeight` hacks, no post-render reflow.

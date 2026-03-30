@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>pretext-forms Demo</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      padding: 24px;
+      font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      font-size: 14px;
+      line-height: 1.5;
+      color: #1a1a2e;
+      background: #f8f9fa;
+    }
+
+    h1 {
+      font-size: 28px;
+      font-weight: 700;
+      margin: 0 0 8px;
+    }
+
+    .subtitle {
+      color: #555;
+      margin: 0 0 32px;
+      font-size: 16px;
+    }
+
+    .panels {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      max-width: 1000px;
+    }
+
+    @media (max-width: 640px) {
+      .panels { grid-template-columns: 1fr; }
+    }
+
+    .panel {
+      background: #fff;
+      border: 1px solid #e0e0e0;
+      border-radius: 12px;
+      padding: 24px;
+    }
+
+    .panel h2 {
+      font-size: 18px;
+      margin: 0 0 4px;
+    }
+
+    .panel p {
+      color: #666;
+      margin: 0 0 16px;
+      font-size: 13px;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      margin-left: 8px;
+    }
+
+    .badge-flash {
+      background: #fee2e2;
+      color: #dc2626;
+    }
+
+    .badge-zero {
+      background: #dcfce7;
+      color: #16a34a;
+    }
+
+    label {
+      display: block;
+      font-weight: 500;
+      margin-bottom: 6px;
+      font-size: 13px;
+      color: #333;
+    }
+
+    textarea, input, select {
+      font-family: inherit;
+      font-size: 14px;
+      line-height: 20px;
+      padding: 8px 12px;
+      border: 1px solid #d0d5dd;
+      border-radius: 8px;
+      width: 100%;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+
+    textarea:focus, input:focus, select:focus {
+      border-color: #6366f1;
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+    }
+
+    .field-group {
+      margin-bottom: 16px;
+    }
+
+    .meta {
+      font-size: 12px;
+      color: #888;
+      margin-top: 4px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .inline-fields {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+    }
+
+    .section-title {
+      font-size: 20px;
+      font-weight: 600;
+      margin: 40px 0 16px;
+    }
+
+    .features {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 12px;
+      max-width: 1000px;
+      margin-bottom: 32px;
+    }
+
+    .feature-card {
+      background: #fff;
+      border: 1px solid #e0e0e0;
+      border-radius: 8px;
+      padding: 16px;
+    }
+
+    .feature-card h3 {
+      font-size: 14px;
+      margin: 0 0 4px;
+    }
+
+    .feature-card p {
+      font-size: 12px;
+      color: #666;
+      margin: 0;
+    }
+  </style>
+</head>
+<body>
+  <h1>@shipitandpray/pretext-forms</h1>
+  <p class="subtitle">Auto-sizing form fields that know their height before render. Zero CLS. Zero flash.</p>
+
+  <div class="features">
+    <div class="feature-card">
+      <h3>Pre-render measurement</h3>
+      <p>Height is calculated in JS before the browser paints. No hidden divs, no scrollHeight.</p>
+    </div>
+    <div class="feature-card">
+      <h3>Zero CLS</h3>
+      <p>Correct dimensions on first paint. No layout shift, ever.</p>
+    </div>
+    <div class="feature-card">
+      <h3>Cross-browser</h3>
+      <p>Works in Chrome, Firefox, Safari. No dependency on CSS field-sizing.</p>
+    </div>
+    <div class="feature-card">
+      <h3>Drop-in replacement</h3>
+      <p>Same API as native textarea/input/select. Just swap the component.</p>
+    </div>
+  </div>
+
+  <div class="panels">
+    <div class="panel">
+      <h2>Native textarea <span class="badge badge-flash">reflow flash</span></h2>
+      <p>Uses scrollHeight measurement post-render. Watch for the 1-frame flash when lines wrap.</p>
+
+      <div class="field-group">
+        <label for="native-textarea">Message</label>
+        <textarea id="native-textarea" rows="1" placeholder="Type to see reflow..." style="overflow: hidden; resize: none;"></textarea>
+        <div class="meta" id="native-meta">Height: -- | Lines: --</div>
+      </div>
+
+      <div class="field-group">
+        <label for="native-input">Tag</label>
+        <input id="native-input" type="text" placeholder="Fixed width input" style="width: 200px;" />
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2>pretext-forms <span class="badge badge-zero">zero cls</span></h2>
+      <p>Uses @chenglou/pretext for pre-render layout. Height is known before paint.</p>
+      <div id="pretext-root"></div>
+    </div>
+  </div>
+
+  <!-- Native textarea auto-resize (the "hack" way) -->
+  <script>
+    const nativeTextarea = document.getElementById('native-textarea');
+    const nativeMeta = document.getElementById('native-meta');
+
+    nativeTextarea.addEventListener('input', function () {
+      // Classic scrollHeight hack: reset to auto, then read scrollHeight
+      this.style.height = 'auto';
+      this.style.height = this.scrollHeight + 'px';
+
+      const lineHeight = 20;
+      const padding = 16; // 8 top + 8 bottom
+      const lines = Math.round((this.scrollHeight - padding) / lineHeight);
+      nativeMeta.textContent = 'Height: ' + this.scrollHeight + 'px | Lines: ' + lines;
+    });
+  </script>
+
+  <!-- Pretext-forms React demo -->
+  <script type="module">
+    import React, { useState, createElement as h } from 'https://esm.sh/react@18.3.1';
+    import { createRoot } from 'https://esm.sh/react-dom@18.3.1/client';
+    import { prepare, layout } from 'https://esm.sh/@chenglou/pretext@0.0.3';
+
+    // Inline the hook logic for the demo (avoids bundling the full package)
+    function useAutoSizeDemo(text, font, fontSize, lineHeight, maxWidth, minRows, maxRows, padding) {
+      return React.useMemo(() => {
+        if (maxWidth <= 0) {
+          const h = minRows * lineHeight + padding.top + padding.bottom;
+          return { height: h, lineCount: minRows, style: { height: h + 'px' } };
+        }
+        const content = text || ' ';
+        const prepared = prepare(content, font);
+        const result = layout(prepared, maxWidth, lineHeight);
+        const clamped = Math.max(minRows, Math.min(maxRows, result.lineCount));
+        const totalH = clamped * lineHeight + padding.top + padding.bottom;
+        return { height: totalH, lineCount: clamped, style: { height: totalH + 'px' } };
+      }, [text, font, fontSize, lineHeight, maxWidth, minRows, maxRows, padding.top, padding.bottom]);
+    }
+
+    function PretextDemo() {
+      const [text, setText] = useState('');
+      const [tag, setTag] = useState('');
+      const [category, setCategory] = useState('bug');
+      const [containerWidth, setContainerWidth] = useState(0);
+      const containerRef = React.useRef(null);
+
+      React.useEffect(() => {
+        const el = containerRef.current;
+        if (!el) return;
+        const measure = () => setContainerWidth(el.clientWidth - 24); // minus padding
+        measure();
+        if (typeof ResizeObserver !== 'undefined') {
+          const ro = new ResizeObserver(measure);
+          ro.observe(el);
+          return () => ro.disconnect();
+        }
+      }, []);
+
+      const padding = { top: 8, right: 12, bottom: 8, left: 12 };
+      const font = '400 14px / 20px Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+      const contentWidth = containerWidth - padding.left - padding.right - 2; // minus border
+      const sizeResult = useAutoSizeDemo(text, font, 14, 20, contentWidth, 1, 20, padding);
+
+      // Measure tag input width
+      const tagWidth = React.useMemo(() => {
+        const content = tag || 'Add tag...';
+        const prepared = prepare(content, font);
+        // Binary search for single-line width
+        let lo = 0, hi = content.length * 20;
+        for (let i = 0; i < 25; i++) {
+          const mid = (lo + hi) / 2;
+          layout(prepared, mid, 20).lineCount <= 1 ? (hi = mid) : (lo = mid);
+        }
+        return Math.max(80, Math.ceil(hi) + 24 + 8); // padding + buffer
+      }, [tag, font]);
+
+      const overflow = sizeResult.lineCount >= 20 ? 'auto' : 'hidden';
+      const borderH = 2; // 1px border top + bottom
+      const textareaHeight = sizeResult.height + borderH;
+
+      return h('div', { ref: containerRef },
+        h('div', { className: 'field-group' },
+          h('label', null, 'Message'),
+          h('textarea', {
+            value: text,
+            onChange: (e) => setText(e.target.value),
+            placeholder: 'Type to see zero-flash resize...',
+            style: { height: textareaHeight + 'px', overflow, resize: 'none' },
+          }),
+          h('div', { className: 'meta' },
+            'Height: ' + textareaHeight + 'px | Lines: ' + sizeResult.lineCount,
+          ),
+        ),
+        h('div', { className: 'field-group' },
+          h('div', { className: 'inline-fields' },
+            h('div', null,
+              h('label', null, 'Tag (auto-width)'),
+              h('input', {
+                value: tag,
+                onChange: (e) => setTag(e.target.value),
+                placeholder: 'Add tag...',
+                style: { width: tagWidth + 'px' },
+              }),
+            ),
+            h('div', null,
+              h('label', null, 'Category (auto-width)'),
+              h('select', {
+                value: category,
+                onChange: (e) => setCategory(e.target.value),
+              },
+                h('option', { value: 'bug' }, 'Bug Report'),
+                h('option', { value: 'feature' }, 'Feature Request'),
+                h('option', { value: 'question' }, 'Question'),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    createRoot(document.getElementById('pretext-root')).render(h(PretextDemo));
+  </script>
+</body>
+</html>

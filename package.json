@@ -1,0 +1,62 @@
+{
+  "name": "@shipitandpray/pretext-forms",
+  "version": "0.1.0",
+  "description": "Auto-sizing form components that calculate exact dimensions before render. Zero CLS. Zero flash.",
+  "author": "ShipItAndPray",
+  "license": "MIT",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "demo": "npx vite demo --open",
+    "demo:build": "npx vite build demo --outDir ../site",
+    "prepublishOnly": "npm run build"
+  },
+  "peerDependencies": {
+    "react": ">=17.0.0",
+    "@chenglou/pretext": ">=0.0.1"
+  },
+  "devDependencies": {
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "@chenglou/pretext": "^0.0.3",
+    "@types/react": "^18.3.3",
+    "@types/react-dom": "^18.3.0",
+    "typescript": "^5.4.0",
+    "tsup": "^8.1.0",
+    "vitest": "^1.6.0",
+    "@testing-library/react": "^15.0.0",
+    "jsdom": "^24.0.0"
+  },
+  "keywords": [
+    "react",
+    "textarea",
+    "autosize",
+    "auto-resize",
+    "pretext",
+    "form",
+    "input",
+    "zero-cls",
+    "field-sizing"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ShipItAndPray/pretext-forms.git"
+  },
+  "homepage": "https://shipitandpray.github.io/pretext-forms/"
+}
